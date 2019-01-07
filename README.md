@@ -1,6 +1,8 @@
 # DevRookieUnreal
 데브루키 언리얼 스터디 테스트베드 프로젝트 
-스터디 안내 및 OT 자료 : https://www.slideshare.net/agebreak/ot-127402767
+
+# 스터디 안내 및 OT 자료
+https://www.slideshare.net/agebreak/ot-127402767
 
 # FaceBookGroup
 https://www.facebook.com/groups/devrookie/
