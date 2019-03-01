@@ -6,6 +6,7 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "ProjectDRUCharacter.h"
 #include "Engine/World.h"
+#include "core/EventManager.h"
 
 AProjectDRUPlayerController::AProjectDRUPlayerController()
 {
@@ -95,6 +96,11 @@ void AProjectDRUPlayerController::SetNewMoveDestination(const FVector DestLocati
 		if ((Distance > 120.0f))
 		{
 			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, DestLocation);
+
+			// Event Driven Å×½ºÆ® 
+			Event_CursorPicked event; 
+			event.pos = DestLocation;
+			EventManager::SendEvent(&event);
 		}
 	}
 }

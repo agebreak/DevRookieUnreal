@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Core/IEventHandler.h"
 #include "ProjectDRUCharacter.generated.h"
 
 UCLASS(Blueprintable)
-class AProjectDRUCharacter : public ACharacter
+class AProjectDRUCharacter : public ACharacter, public IEventHandler
 {
 	GENERATED_BODY()
 

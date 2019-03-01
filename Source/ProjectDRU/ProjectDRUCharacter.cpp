@@ -55,6 +55,13 @@ AProjectDRUCharacter::AProjectDRUCharacter()
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	// Event µî·Ï
+	Bind(EventID::CURSOR_PICKED, [&](IEvent* pEvent) {
+		Event_CursorPicked* picked = (Event_CursorPicked*)pEvent;
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, picked->pos.ToString());
+	});
 }
 
 void AProjectDRUCharacter::Tick(float DeltaSeconds)
