@@ -12,11 +12,6 @@ AProjectDRUGameMode::AProjectDRUGameMode()
 	// use our custom PlayerController class	
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 
-	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT(
-	"/Game/Blueprint/MyCharacter_BP.MyCharacter_BP_C"));
-	if (PlayerPawnBPClass.Class != NULL)
-	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+	static ConstructorHelpers::FClassFinder<AMyCharacter> PAWN(TEXT("Blueprint'/Game/Blueprint/MyCharacter_BP.MyCharacter_BP_C'"));
+	DefaultPawnClass = PAWN.Class;
 }

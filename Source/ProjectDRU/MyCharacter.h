@@ -35,7 +35,19 @@ protected:
 
 	void AttackStartComboState();
 	void AttackEndComboState();
+
+	void MoveForwad(float NewAxisValue);
+	void MoveRight(float NewAxisValue);
+	void Turn(float NewAxisValue);
+	void LookUp(float NewAxisValue);
+
 protected:
+	UPROPERTY(VisibleAnywhere, Category=Camera)
+	class USpringArmComponent* SpringArm; 
+
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	class UCameraComponent* Camera;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool IsAttacking = false;
 
