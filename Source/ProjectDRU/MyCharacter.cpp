@@ -128,3 +128,50 @@ void AMyCharacter::LookUp(float NewAxisValue)
 	AddControllerPitchInput(NewAxisValue);
 }
 
+// 데미지 손상 현재 체력 -
+void AMyCharacter::Damaged(float point)
+{	
+	CurrentHpPoint -= point;
+
+	if (CurrentHpPoint < 0)
+	{
+		CurrentHpPoint = 0;
+	}
+}
+
+// 체력 회복 현재 체력 +
+void AMyCharacter::HPRestore(float point)
+{
+	CurrentHpPoint += point;
+	
+	if (CurrentHpPoint > MaxHpPoint)
+	{
+		CurrentHpPoint = MaxHpPoint;
+	}
+}
+
+bool AMyCharacter::MpUse(float point)
+{
+	if (CurrentMpPoint < point)
+	{
+		// 마나 부족
+		return false;
+	}
+	else
+	{
+		// 스킬 사용
+		CurrentMpPoint -= point;
+		return true;
+	}
+}
+
+void AMyCharacter::MPRestore(float point)
+{
+	CurrentMpPoint += point;
+
+	if (CurrentMpPoint > MaxMpPoint)
+	{
+		CurrentMpPoint = MaxMpPoint;
+	}
+}
+
