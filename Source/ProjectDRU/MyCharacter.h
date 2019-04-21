@@ -40,6 +40,8 @@ protected:
 	void MoveRight(float NewAxisValue);
 	void Turn(float NewAxisValue);
 	void LookUp(float NewAxisValue);
+	void StartJump();
+	void StopJump();
 
 	/// [노대영] HP / MP 관련 함수 - Begin
 

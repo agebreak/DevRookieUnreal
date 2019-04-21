@@ -64,6 +64,10 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AMyCharacter::MoveRight);
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AMyCharacter::Turn);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AMyCharacter::LookUp);
+
+	// Jump에 대한 Action Binding
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AMyCharacter::StartJump);
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AMyCharacter::StopJump);
 }
 
 void AMyCharacter::Attack()
@@ -127,6 +131,19 @@ void AMyCharacter::LookUp(float NewAxisValue)
 {
 	AddControllerPitchInput(NewAxisValue);
 }
+
+void AMyCharacter::StartJump()
+{
+	// bPressedJump 변수는 Character.h에 정의되있는 bool형 변수.
+	bPressedJump = true;
+}
+
+void AMyCharacter::StopJump()
+{
+	bPressedJump = false;
+}
+
+
 
 // 데미지 손상 현재 체력 -
 void AMyCharacter::Damaged(float point)
