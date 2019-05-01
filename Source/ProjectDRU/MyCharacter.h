@@ -84,7 +84,6 @@ protected:
 	UPROPERTY()
 	class UMyAnimInstance* AnimInstance;
 
-	
 	/// [노대영] HP / MP 관련 속성 - Begin
 
 	bool IsDie = false; // 죽었는지 체크
