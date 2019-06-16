@@ -75,3 +75,5 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Content/InfinityBladeGrassLands/Maps/Overview.umap
+Content/InfinityBladeGrassLands/Maps/ElvenRuins.umap

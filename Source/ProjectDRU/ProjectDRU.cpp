@@ -5,5 +5,5 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, ProjectDRU, "ProjectDRU" );
 
-DEFINE_LOG_CATEGORY(LogProjectDRU)
+DEFINE_LOG_CATEGORY(LogProjectDRU);
  
