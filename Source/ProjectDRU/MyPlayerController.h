@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ProjectDRU.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
@@ -14,4 +14,10 @@ class PROJECTDRU_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void PostInitializeComponents() override;
+	virtual void OnPossess(APawn* aPawn) override;
+
+protected:
+	virtual void BeginPlay() override;
 };

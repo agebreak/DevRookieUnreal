@@ -6,12 +6,25 @@
 #include "MyPlayerController.h"
 #include "MyCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Engine.h"
 
-AProjectDRUGameMode::AProjectDRUGameMode()
+AProjectDRUGameMode::AProjectDRUGameMode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	// use our custom PlayerController class	
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 
 	static ConstructorHelpers::FClassFinder<AMyCharacter> PAWN(TEXT("Blueprint'/Game/Blueprint/MyCharacter_BP.MyCharacter_BP_C'"));
-	DefaultPawnClass = PAWN.Class;
+
+	if (PAWN.Class != NULL)
+	{
+		DefaultPawnClass = PAWN.Class;
+	}
+}
+
+void AProjectDRUGameMode::PostLogin(APlayerController * NewPlayer)
+{
+	ABLOG(Warning, TEXT("PostLogin Begin"));
+	Super::PostLogin(NewPlayer);
+	ABLOG(Warning, TEXT("PostLogin End"));
 }

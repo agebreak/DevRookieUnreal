@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ProjectDRU.h"
 #include "GameFramework/Character.h"
 #include "MyCharacter.generated.h"
 
@@ -23,9 +23,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+private:
+	void ViewChange();
 
 protected:
 	void Attack();
@@ -42,6 +46,22 @@ protected:
 	void LookUp(float NewAxisValue);
 	void StartJump();
 	void StopJump();
+
+	enum class EControlMode
+	{
+		GTA,
+		DIABLO
+	};
+
+	void SetControlMode(EControlMode NewControlMode);
+	EControlMode CurrentControlMode = EControlMode::GTA;
+
+	FVector DirectionToMove = FVector::ZeroVector;
+
+	float ArmLengthTo = 0.0f;
+	FRotator ArmRotationTo = FRotator::ZeroRotator;
+	float ArmLengthSpeed = 0.0f;
+	float ArmRotationSpeed = 0.0f;
 
 	/// [노대영] HP / MP 관련 함수 - Begin
 
