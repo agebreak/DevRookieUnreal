@@ -26,6 +26,7 @@ AMyCharacter::AMyCharacter()
 
 	ArmLengthSpeed = 3.0f;
 	ArmRotationSpeed = 10.0f;
+	//GetCharacterMovement()->JumpZVelocity = 800.0f;				// 캐릭터의 점프 범위를 설정할 수 있다. 기본값은 420
 }
 
 // Called when the game starts or when spawned

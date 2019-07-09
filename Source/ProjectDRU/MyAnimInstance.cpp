@@ -10,6 +10,9 @@ UMyAnimInstance::UMyAnimInstance()
 	{
 		AttackMontage = ATTACK_MONTAGE.Object;
 	}
+
+	CurrentPawnSpeed = 0.0f;
+	IsInAir = false;
 }
 
 void UMyAnimInstance::PlayAttackMontage()
@@ -21,6 +24,23 @@ void UMyAnimInstance::JumpToAttackMontageSection(int32 NewSection)
 {
 	ABCHECK(Montage_IsPlaying(AttackMontage));
 	Montage_JumpToSection(GetAttackMontageSectionName(NewSection), AttackMontage);
+}
+
+void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	auto Pawn = TryGetPawnOwner();
+	if (::IsValid(Pawn))
+	{
+		CurrentPawnSpeed = Pawn->GetVelocity().Size();
+
+		auto Character = Cast<ACharacter>(Pawn);
+		if (Character)
+		{
+			IsInAir = Character->GetMovementComponent()->IsFalling();
+		}
+	}
 }
 
 void UMyAnimInstance::AnimNotify_NextAttackCheck()
