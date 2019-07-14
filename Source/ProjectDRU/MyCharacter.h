@@ -28,11 +28,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 private:
 	void ViewChange();
 
 protected:
 	void Attack();
+	void AttackCheck();
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -103,6 +106,13 @@ protected:
 
 	UPROPERTY()
 	class UMyAnimInstance* AnimInstance;
+
+	UPROPERTY(VisibleINstanceOnly, BlueprintReadonly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	float AttackRange;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	float AttackRadius;
+	
 
 	/// [노대영] HP / MP 관련 속성 - Begin
 

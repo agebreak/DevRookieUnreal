@@ -13,15 +13,18 @@ UMyAnimInstance::UMyAnimInstance()
 
 	CurrentPawnSpeed = 0.0f;
 	IsInAir = false;
+	IsDead = false;
 }
 
 void UMyAnimInstance::PlayAttackMontage()
 {
+	ABCHECK(!IsDead);
 	Montage_Play(AttackMontage);
 }
 
 void UMyAnimInstance::JumpToAttackMontageSection(int32 NewSection)
 {
+	ABCHECK(!IsDead);
 	ABCHECK(Montage_IsPlaying(AttackMontage));
 	Montage_JumpToSection(GetAttackMontageSectionName(NewSection), AttackMontage);
 }
@@ -31,7 +34,9 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
 	auto Pawn = TryGetPawnOwner();
-	if (::IsValid(Pawn))
+	if (!::IsValid(Pawn)) return;
+
+	if (!IsDead)
 	{
 		CurrentPawnSpeed = Pawn->GetVelocity().Size();
 
@@ -45,11 +50,13 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void UMyAnimInstance::AnimNotify_NextAttackCheck()
 {
+	ABLOG(Warning, TEXT("AnimNotify_NextAttackCheck()"));
 	OnNextAttackCheck.Broadcast();
 }
 
 void UMyAnimInstance::AnimNotify_AttackHitCheck()
 {
+	ABLOG(Warning, TEXT("AnimNotify_AttackHitCheck()"));
 	OnAttackHitCheck.Broadcast();
 }
 

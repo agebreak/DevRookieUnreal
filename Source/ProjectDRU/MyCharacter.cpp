@@ -2,6 +2,7 @@
 
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
+#include "DrawDebugHelpers.h"
 #include "ProjectDRU.h"
 #include "EngineMinimal.h"
 
@@ -27,6 +28,14 @@ AMyCharacter::AMyCharacter()
 	ArmLengthSpeed = 3.0f;
 	ArmRotationSpeed = 10.0f;
 	//GetCharacterMovement()->JumpZVelocity = 800.0f;				// 캐릭터의 점프 범위를 설정할 수 있다. 기본값은 420
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
+	
+	AttackRange = 200.0f;
+	AttackRadius = 50.0f;
+
+	MaxHpPoint = 500.0f;
+	CurrentHpPoint = MaxHpPoint;
 }
 
 // Called when the game starts or when spawned
@@ -72,6 +81,8 @@ void AMyCharacter::PostInitializeComponents()
 			AnimInstance->JumpToAttackMontageSection(CurrentCombo);
 		}
 	});
+
+	AnimInstance->OnAttackHitCheck.AddUObject(this, &AMyCharacter::AttackCheck);
 }
 
 void AMyCharacter::PossessedBy(AController * NewController)
@@ -97,6 +108,23 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("ViewChange"), EInputEvent::IE_Pressed, this, &AMyCharacter::ViewChange);
 }
 
+float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	// 액터의 기능 중, Can be Damaged이란 속성을 false로 설정하면 데미지 결과가 0으로 설정되 무적 상태가 될 수 있다.
+	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
+
+	Damaged(FinalDamage);
+
+	if (CurrentHpPoint <= 0.0f)
+	{
+		AnimInstance->SetDeadAnim();
+		SetActorEnableCollision(false);
+	}
+
+	return FinalDamage;
+}
+
 void AMyCharacter::ViewChange()
 {
 	switch (CurrentControlMode)
@@ -114,6 +142,7 @@ void AMyCharacter::ViewChange()
 
 void AMyCharacter::Attack()
 {
+	ABLOG(Warning, TEXT("IsAttacking %s : , CurrentCombo : %d"), IsAttacking ? TEXT("true") : TEXT("false"), CurrentCombo);
 	if (IsAttacking)
 	{
 		ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
@@ -132,6 +161,53 @@ void AMyCharacter::Attack()
 	}
 }
 
+void AMyCharacter::AttackCheck()
+{
+	ABLOG(Warning, TEXT("ATtackCheck()"));
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackRange,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel2,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+
+#if ENABLE_DRAW_DEBUG
+
+	FVector TraceVec = GetActorForwardVector() * AttackRange;
+	FVector Center = GetActorLocation() + TraceVec * 0.5f;
+	float HalfHeight = AttackRange * 0.5f + AttackRadius;
+	FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVec).ToQuat();
+	FColor DrawColor = bResult ? FColor::Green : FColor::Red;
+	float DebugLifeTime = 5.0f;
+
+	DrawDebugCapsule(GetWorld(),
+		Center,
+		HalfHeight,
+		AttackRadius,
+		CapsuleRot,
+		DrawColor,
+		false,
+		DebugLifeTime);
+
+#endif
+
+	if (bResult)
+	{
+		if (HitResult.Actor.IsValid())
+		{
+			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
+
+			FDamageEvent DamageEvent;
+			HitResult.Actor->TakeDamage(50.0f, DamageEvent, GetController(), this);			// Params : DamageAmount, DamageEvent, EventInstigator, DamageCauser
+		}
+	}
+}
+
 void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	ABCHECK(IsAttacking);
@@ -144,6 +220,7 @@ void AMyCharacter::AttackStartComboState()
 {
 	CanNextCombo = true;
 	IsComboInputOn = false;
+	ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 0, MaxCombo - 1));
 	CurrentCombo = FMath::Clamp(CurrentCombo + 1, 0, MaxCombo);
 }
 
