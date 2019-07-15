@@ -2,6 +2,7 @@
 
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
+#include "MyWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "ProjectDRU.h"
 #include "EngineMinimal.h"
@@ -20,9 +21,7 @@ AMyCharacter::AMyCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
 	Camera->SetupAttachment(SpringArm);
 
-
 	AttackEndComboState();
-	//SetControlMode(EControlMode::GTA);
 	SetControlMode(EControlMode::DIABLO);
 
 	ArmLengthSpeed = 3.0f;
@@ -36,13 +35,33 @@ AMyCharacter::AMyCharacter()
 
 	MaxHpPoint = 500.0f;
 	CurrentHpPoint = MaxHpPoint;
+
+	//UE_LOG(LogProjectDRU, Warning, TEXT("GetMesh() : %s"), *GetMesh()->GetName());
+	//if (GetMesh()->DoesSocketExist(TEXT("myWeapon_r")))		// 현재 4.22.2버전에서 DoesSocketExist 함수가 소켓을 찾지 못하고 false를 반환하는 버그 발생.. 추후 고쳐지면 사용하거나, 다른 방법 필요.
+	{
+		Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_WEAPON(TEXT("/Game/InfinityBladeWeapons/Weapons/Blade/Swords/Blade_BlackKnight/SK_Blade_BlackKnight.SK_Blade_BlackKnight"));
+
+		if (SK_WEAPON.Succeeded())
+		{
+			Weapon->SetSkeletalMesh(SK_WEAPON.Object);
+		}
+
+		Weapon->SetupAttachment(GetMesh(), TEXT("myWeapon_r"));
+	}
+	ABLOG(Warning, TEXT("DoesExist : %s"), (GetMesh()->DoesSocketExist(TEXT("myWeapon_r"))) ? TEXT("true") : TEXT("false"));
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	auto CurWeapon = GetWorld()->SpawnActor<AMyWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
+	if (nullptr != CurWeapon)
+	{
+		CurWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("myWeapon_r"));
+	}
 }
 
 // Called every frame
@@ -123,6 +142,23 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const & DamageEv
 	}
 
 	return FinalDamage;
+}
+
+bool AMyCharacter::CanSetWeapon()
+{
+	return (nullptr == CurrentWeapon);
+}
+
+void AMyCharacter::SetWeapon(AMyWeapon* NewWeapon)
+{
+	ABCHECK(nullptr != NewWeapon && nullptr == CurrentWeapon);
+	FName WeaponSocket(TEXT("myWeapon_r"));
+	if (nullptr != NewWeapon)
+	{
+		NewWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocket);
+		NewWeapon->SetOwner(this);
+		CurrentWeapon = NewWeapon;
+	}
 }
 
 void AMyCharacter::ViewChange()
@@ -299,8 +335,6 @@ void AMyCharacter::SetControlMode(EControlMode NewControlMode)
 	switch (CurrentControlMode)
 	{
 	case EControlMode::GTA:
-		//SpringArm->TargetArmLength = 450.0f;
-		//SpringArm->SetRelativeRotation(FRotator::ZeroRotator);
 		ArmLengthTo = 450.0f;
 		SpringArm->bUsePawnControlRotation = true;
 		SpringArm->bInheritPitch = true;
@@ -314,8 +348,6 @@ void AMyCharacter::SetControlMode(EControlMode NewControlMode)
 		break;
 
 	case EControlMode::DIABLO:
-		//SpringArm->TargetArmLength = 800.0f;
-		//SpringArm->SetRelativeRotation(FRotator(-45.0f, 0.0f, 0.0f));
 		ArmLengthTo = 800.0f;
 		ArmRotationTo = FRotator(-45.0f, 0.0f, 0.0f);
 		SpringArm->bUsePawnControlRotation = false;

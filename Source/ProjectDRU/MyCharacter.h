@@ -30,6 +30,12 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	bool CanSetWeapon();
+	void SetWeapon(class AMyWeapon* NewWeapon);
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class AMyWeapon* CurrentWeapon;
+
 private:
 	void ViewChange();
 
@@ -83,6 +89,9 @@ protected:
 	/// [노대영] HP / MP 관련 함수 - End
 
 protected:
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	USkeletalMeshComponent* Weapon;
+
 	UPROPERTY(VisibleAnywhere, Category=Camera)
 	class USpringArmComponent* SpringArm; 
 
