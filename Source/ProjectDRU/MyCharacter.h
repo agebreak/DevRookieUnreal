@@ -36,6 +36,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	class AMyWeapon* CurrentWeapon;
 
+	UPROPERTY(VisibleAnywhere, Category = Stat)
+	class UCharacterStatComponent* CharacterStat;
+
+
 private:
 	void ViewChange();
 

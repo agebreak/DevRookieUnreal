@@ -3,6 +3,7 @@
 #include "MyCharacter.h"
 #include "MyAnimInstance.h"
 #include "MyWeapon.h"
+#include "CharacterStatComponent.h"
 #include "DrawDebugHelpers.h"
 #include "ProjectDRU.h"
 #include "EngineMinimal.h"
@@ -50,6 +51,8 @@ AMyCharacter::AMyCharacter()
 		Weapon->SetupAttachment(GetMesh(), TEXT("myWeapon_r"));
 	}
 	ABLOG(Warning, TEXT("DoesExist : %s"), (GetMesh()->DoesSocketExist(TEXT("myWeapon_r"))) ? TEXT("true") : TEXT("false"));
+
+	CharacterStat = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 }
 
 // Called when the game starts or when spawned
@@ -102,6 +105,12 @@ void AMyCharacter::PostInitializeComponents()
 	});
 
 	AnimInstance->OnAttackHitCheck.AddUObject(this, &AMyCharacter::AttackCheck);
+
+	CharacterStat->OnHPIsZero.AddLambda([this]() -> void {
+		ABLOG(Warning, TEXT("OnHPIsZero"));
+		AnimInstance->SetDeadAnim();
+		SetActorEnableCollision(false);
+	});
 }
 
 void AMyCharacter::PossessedBy(AController * NewController)
@@ -133,13 +142,9 @@ float AMyCharacter::TakeDamage(float DamageAmount, FDamageEvent const & DamageEv
 	float FinalDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), FinalDamage);
 
-	Damaged(FinalDamage);
+	//Damaged(FinalDamage);
 
-	if (CurrentHpPoint <= 0.0f)
-	{
-		AnimInstance->SetDeadAnim();
-		SetActorEnableCollision(false);
-	}
+	CharacterStat->SetDamage(FinalDamage);
 
 	return FinalDamage;
 }
@@ -239,7 +244,7 @@ void AMyCharacter::AttackCheck()
 			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *HitResult.Actor->GetName());
 
 			FDamageEvent DamageEvent;
-			HitResult.Actor->TakeDamage(50.0f, DamageEvent, GetController(), this);			// Params : DamageAmount, DamageEvent, EventInstigator, DamageCauser
+			HitResult.Actor->TakeDamage(CharacterStat->GetAttack(), DamageEvent, GetController(), this);			// Params : DamageAmount, DamageEvent, EventInstigator, DamageCauser
 		}
 	}
 }
