@@ -36,6 +36,7 @@ void UCharacterStatComponent::SetNewLevel(int32 NewLevel)
 	if (nullptr != CurrentStatData)
 	{
 		Level = NewLevel;
+		SetHP(CurrentStatData->MaxHP);
 		CurrentHP = CurrentStatData->MaxHP;
 	}
 	else
@@ -47,10 +48,21 @@ void UCharacterStatComponent::SetNewLevel(int32 NewLevel)
 void UCharacterStatComponent::SetDamage(float NewDamage)
 {
 	ABCHECK(nullptr != CurrentStatData);
-	CurrentHP = FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP);
+	SetHP(FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP));
 
 	if (CurrentHP <= 0.0f)
 	{
+		OnHPIsZero.Broadcast();
+	}
+}
+
+void UCharacterStatComponent::SetHP(float NewHP)
+{
+	CurrentHP = NewHP;
+	OnHpChanged.Broadcast();
+	if (CurrentHP < KINDA_SMALL_NUMBER)				// KINDA_SMALL_NUMBER 는 언리얼에서 제공하는 매크로로, float의 값을 0과 비교할 때 미세한 오차 범위를 무시하고 측정할 수 있도록 제공.
+	{
+		CurrentHP = 0.0f;
 		OnHPIsZero.Broadcast();
 	}
 }
@@ -59,6 +71,13 @@ float UCharacterStatComponent::GetAttack()
 {
 	ABCHECK(nullptr != CurrentStatData, 0.0f);
 	return CurrentStatData->Attack;
+}
+
+float UCharacterStatComponent::GetHPRatio()
+{
+	ABCHECK(nullptr != CurrentStatData, 0.0f);
+
+	return (CurrentStatData->MaxHP < KINDA_SMALL_NUMBER);
 }
 
 

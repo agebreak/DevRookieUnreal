@@ -6,7 +6,9 @@
 #include "CharacterStatComponent.h"
 #include "DrawDebugHelpers.h"
 #include "ProjectDRU.h"
-#include "EngineMinimal.h"
+#include "Components/WidgetComponent.h"
+#include "CharacterWidget.h"
+//#include "EngineMinimal.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -14,6 +16,7 @@ AMyCharacter::AMyCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// SpringArm 및 Camera 작업
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	SpringArm->TargetArmLength = 400.0f; 
@@ -29,6 +32,7 @@ AMyCharacter::AMyCharacter()
 	ArmRotationSpeed = 10.0f;
 	//GetCharacterMovement()->JumpZVelocity = 800.0f;				// 캐릭터의 점프 범위를 설정할 수 있다. 기본값은 420
 
+	// MyCharacter 정보 작업
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("MyCharacter"));
 	
 	AttackRange = 200.0f;
@@ -37,6 +41,7 @@ AMyCharacter::AMyCharacter()
 	MaxHpPoint = 500.0f;
 	CurrentHpPoint = MaxHpPoint;
 
+	// 무기 변경 작업
 	//UE_LOG(LogProjectDRU, Warning, TEXT("GetMesh() : %s"), *GetMesh()->GetName());
 	//if (GetMesh()->DoesSocketExist(TEXT("myWeapon_r")))		// 현재 4.22.2버전에서 DoesSocketExist 함수가 소켓을 찾지 못하고 false를 반환하는 버그 발생.. 추후 고쳐지면 사용하거나, 다른 방법 필요.
 	{
@@ -51,8 +56,22 @@ AMyCharacter::AMyCharacter()
 		Weapon->SetupAttachment(GetMesh(), TEXT("myWeapon_r"));
 	}
 	ABLOG(Warning, TEXT("DoesExist : %s"), (GetMesh()->DoesSocketExist(TEXT("myWeapon_r"))) ? TEXT("true") : TEXT("false"));
-
+	
+	// 캐릭터 정보를 담은 GameInstance
 	CharacterStat = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CHARACTERSTAT"));
+
+	// 캐릭터 HP를 표시할 WidgetComponent
+	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
+	HPBarWidget->SetupAttachment(GetMesh());
+
+	HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
+	HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));
+	if (UI_HUD.Succeeded())
+	{
+		HPBarWidget->SetWidgetClass(UI_HUD.Class);
+		HPBarWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -111,6 +130,13 @@ void AMyCharacter::PostInitializeComponents()
 		AnimInstance->SetDeadAnim();
 		SetActorEnableCollision(false);
 	});
+
+	auto CharacterWidget = Cast<UCharacterWidget>(HPBarWidget->GetUserWidgetObject());
+
+	if (nullptr != CharacterWidget)
+	{
+		CharacterWidget->BindCharacterStat(CharacterStat);
+	}
 }
 
 void AMyCharacter::PossessedBy(AController * NewController)

@@ -7,6 +7,7 @@
 #include "CharacterStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnHPIsZeroDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnHpChangedDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTDRU_API UCharacterStatComponent : public UActorComponent
@@ -25,9 +26,12 @@ protected:
 public:
 	void SetNewLevel(int32 NewLevel);
 	void SetDamage(float NewDamage);
+	void SetHP(float NewHp);
 	float GetAttack();
+	float GetHPRatio();
 
 	FOnHPIsZeroDelegate OnHPIsZero;
+	FOnHpChangedDelegate OnHpChanged;
 
 private:
 	struct FDRUCharacterData* CurrentStatData = nullptr;
