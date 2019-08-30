@@ -5,12 +5,22 @@
 	"Description": "",
 	"Modules": [
 		{
+			"Name": "PRojectDRUSetting",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"AdditionalDependencies": [
+				"CoreUObject"
+			]
+		},
+		{
 			"Name": "ProjectDRU",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UMG"
+				"UMG",
+				"AIModule",
+				"ProjectDRUSetting"
 			]
 		}
 	]

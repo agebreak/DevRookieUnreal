@@ -33,6 +33,7 @@ void UCharacterStatComponent::SetNewLevel(int32 NewLevel)
 
 	ABCHECK(nullptr != DRUGameInstance);
 	CurrentStatData = DRUGameInstance->GetDRUCharacterData(NewLevel);
+	ABLOG(Warning, TEXT(" NewLevel : %d, MaxHp : %f "), NewLevel, CurrentStatData->MaxHP)
 	if (nullptr != CurrentStatData)
 	{
 		Level = NewLevel;
@@ -49,17 +50,15 @@ void UCharacterStatComponent::SetDamage(float NewDamage)
 {
 	ABCHECK(nullptr != CurrentStatData);
 	SetHP(FMath::Clamp<float>(CurrentHP - NewDamage, 0.0f, CurrentStatData->MaxHP));
-
-	if (CurrentHP <= 0.0f)
-	{
-		OnHPIsZero.Broadcast();
-	}
+	ABLOG(Warning, TEXT("SetDamage damage %f"), NewDamage);
 }
 
 void UCharacterStatComponent::SetHP(float NewHP)
 {
+	ABLOG(Warning, TEXT("SetHP NewHP %f, CurrentHp : %f"), NewHP, CurrentHP);
 	CurrentHP = NewHP;
 	OnHpChanged.Broadcast();
+	ABLOG(Warning, TEXT("CurrentHP < KINDA_SMALL_NUMBER ? %s"), (CurrentHP < KINDA_SMALL_NUMBER) ? TEXT("TRUE") : TEXT("FALSE"));
 	if (CurrentHP < KINDA_SMALL_NUMBER)				// KINDA_SMALL_NUMBER 는 언리얼에서 제공하는 매크로로, float의 값을 0과 비교할 때 미세한 오차 범위를 무시하고 측정할 수 있도록 제공.
 	{
 		CurrentHP = 0.0f;
@@ -77,7 +76,7 @@ float UCharacterStatComponent::GetHPRatio()
 {
 	ABCHECK(nullptr != CurrentStatData, 0.0f);
 
-	return (CurrentStatData->MaxHP < KINDA_SMALL_NUMBER);
+	return (CurrentStatData->MaxHP < KINDA_SMALL_NUMBER) ? 0.0f : (CurrentHP / CurrentStatData->MaxHP);
 }
 
 

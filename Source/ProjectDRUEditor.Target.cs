@@ -8,6 +8,7 @@ public class ProjectDRUEditorTarget : TargetRules
 	public ProjectDRUEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-		ExtraModuleNames.Add("ProjectDRU");
+        //ExtraModuleNames.Add("ProjectDRU", "ProjectDRUSetting");
+        ExtraModuleNames.AddRange(new string[] { "ProjectDRU", "ProjectDRUSetting"});
 	}
 }

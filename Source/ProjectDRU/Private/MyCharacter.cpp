@@ -8,6 +8,7 @@
 #include "ProjectDRU.h"
 #include "Components/WidgetComponent.h"
 #include "CharacterWidget.h"
+//#include "NpcAIController.h"
 //#include "EngineMinimal.h"
 
 // Sets default values
@@ -26,7 +27,7 @@ AMyCharacter::AMyCharacter()
 	Camera->SetupAttachment(SpringArm);
 
 	AttackEndComboState();
-	SetControlMode(EControlMode::DIABLO);
+	SetControlMode(EControlMode::QUATERVIEW);
 
 	ArmLengthSpeed = 3.0f;
 	ArmRotationSpeed = 10.0f;
@@ -66,12 +67,27 @@ AMyCharacter::AMyCharacter()
 
 	HPBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 	HPBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	
 	static ConstructorHelpers::FClassFinder<UUserWidget> UI_HUD(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));
+	ABLOG(Warning, TEXT("UI_HUD Succedded() : %s"), (UI_HUD.Succeeded()) ? TEXT("TRUE") : TEXT("FALSE"));
 	if (UI_HUD.Succeeded())
 	{
 		HPBarWidget->SetWidgetClass(UI_HUD.Class);
 		HPBarWidget->SetDrawSize(FVector2D(150.0f, 50.0f));
+		HPBarWidget->InitWidget();
+
+		auto CharacterWidget = Cast<UCharacterWidget>(HPBarWidget->GetUserWidgetObject());
+
+		ABLOG(Warning, TEXT("HPBarWidget Not NULL? %s"), (nullptr != HPBarWidget) ? TEXT("TRUE") : TEXT("FALSE"));
+		ABLOG(Warning, TEXT("Widget Not NULL? %s"), (nullptr != CharacterWidget) ? TEXT("TRUE") : TEXT("FALSE"));
+		if (nullptr != CharacterWidget)
+		{
+			CharacterWidget->BindCharacterStat(CharacterStat);
+		}
 	}
+
+	/*AIControllerClass = ANpcAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;*/
 }
 
 // Called when the game starts or when spawned
@@ -95,7 +111,7 @@ void AMyCharacter::Tick(float DeltaTime)
 
 	switch (CurrentControlMode)
 	{
-	case EControlMode::DIABLO:
+	case EControlMode::QUATERVIEW:
 		SpringArm->RelativeRotation = FMath::RInterpTo(SpringArm->RelativeRotation, ArmRotationTo, DeltaTime, ArmRotationSpeed);
 
 		if (DirectionToMove.SizeSquared() > 0.0f)
@@ -130,19 +146,23 @@ void AMyCharacter::PostInitializeComponents()
 		AnimInstance->SetDeadAnim();
 		SetActorEnableCollision(false);
 	});
-
-	auto CharacterWidget = Cast<UCharacterWidget>(HPBarWidget->GetUserWidgetObject());
-
-	if (nullptr != CharacterWidget)
-	{
-		CharacterWidget->BindCharacterStat(CharacterStat);
-	}
 }
 
 void AMyCharacter::PossessedBy(AController * NewController)
 {
 	Super::PossessedBy(NewController);
 	ABLOG(Warning, TEXT("AMyCharacter PossessedBy"));
+
+	if (IsPlayerControlled())
+	{
+		SetControlMode(EControlMode::QUATERVIEW);
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
+	else
+	{
+		SetControlMode(EControlMode::NPC);
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	}
 }
 
 // Called to bind functionality to input
@@ -198,9 +218,9 @@ void AMyCharacter::ViewChange()
 	{
 	case EControlMode::GTA:
 		GetController()->SetControlRotation(GetActorRotation());
-		SetControlMode(EControlMode::DIABLO);
+		SetControlMode(EControlMode::QUATERVIEW);
 		break;
-	case EControlMode::DIABLO:
+	case EControlMode::QUATERVIEW:
 		GetController()->SetControlRotation(SpringArm->RelativeRotation);
 		SetControlMode(EControlMode::GTA);
 		break;
@@ -230,7 +250,7 @@ void AMyCharacter::Attack()
 
 void AMyCharacter::AttackCheck()
 {
-	ABLOG(Warning, TEXT("ATtackCheck()"));
+	ABLOG(Warning, TEXT("attackCheck()"));
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	bool bResult = GetWorld()->SweepSingleByChannel(
@@ -281,6 +301,7 @@ void AMyCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	ABCHECK(CurrentCombo > 0);
 	IsAttacking = false;
 	AttackEndComboState();
+	OnAttackEnd.Broadcast();
 }
 
 void AMyCharacter::AttackStartComboState()
@@ -306,7 +327,7 @@ void AMyCharacter::MoveForwad(float NewAxisValue)
 		// 컨트롤 회전값으로부터 시선 방향과 우측 방향의 벡터 값을 가져오는 코드 (문제있음...)
 		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
 		break;
-	case EControlMode::DIABLO:
+	case EControlMode::QUATERVIEW:
 		DirectionToMove.X = NewAxisValue;
 		break;
 	}
@@ -321,7 +342,7 @@ void AMyCharacter::MoveRight(float NewAxisValue)
 		// 컨트롤 회전값으로부터 시선 방향과 우측 방향의 벡터 값을 가져오는 코드 (문제있음...)
 		AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
 		break;
-	case EControlMode::DIABLO:
+	case EControlMode::QUATERVIEW:
 		DirectionToMove.Y = NewAxisValue;
 		break;
 	}
@@ -378,7 +399,7 @@ void AMyCharacter::SetControlMode(EControlMode NewControlMode)
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 		break;
 
-	case EControlMode::DIABLO:
+	case EControlMode::QUATERVIEW:
 		ArmLengthTo = 800.0f;
 		ArmRotationTo = FRotator(-45.0f, 0.0f, 0.0f);
 		SpringArm->bUsePawnControlRotation = false;
@@ -391,55 +412,60 @@ void AMyCharacter::SetControlMode(EControlMode NewControlMode)
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 		break;
+
+	case EControlMode::NPC:
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		GetCharacterMovement()->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
+		break;
 	}
 }
-
-
 
 // 데미지 손상 현재 체력 -
-void AMyCharacter::Damaged(float point)
-{	
-	CurrentHpPoint -= point;
-
-	if (CurrentHpPoint < 0)
-	{
-		CurrentHpPoint = 0;
-	}
-}
-
-// 체력 회복 현재 체력 +
-void AMyCharacter::HPRestore(float point)
-{
-	CurrentHpPoint += point;
-	
-	if (CurrentHpPoint > MaxHpPoint)
-	{
-		CurrentHpPoint = MaxHpPoint;
-	}
-}
-
-bool AMyCharacter::MpUse(float point)
-{
-	if (CurrentMpPoint < point)
-	{
-		// 마나 부족
-		return false;
-	}
-	else
-	{
-		// 스킬 사용
-		CurrentMpPoint -= point;
-		return true;
-	}
-}
-
-void AMyCharacter::MPRestore(float point)
-{
-	CurrentMpPoint += point;
-
-	if (CurrentMpPoint > MaxMpPoint)
-	{
-		CurrentMpPoint = MaxMpPoint;
-	}
-}
+//void AMyCharacter::Damaged(float point)
+//{	
+//	CurrentHpPoint -= point;
+//
+//	if (CurrentHpPoint < 0)
+//	{
+//		CurrentHpPoint = 0;
+//	}
+//}
+//
+//// 체력 회복 현재 체력 +
+//void AMyCharacter::HPRestore(float point)
+//{
+//	CurrentHpPoint += point;
+//	
+//	if (CurrentHpPoint > MaxHpPoint)
+//	{
+//		CurrentHpPoint = MaxHpPoint;
+//	}
+//}
+//
+//bool AMyCharacter::MpUse(float point)
+//{
+//	if (CurrentMpPoint < point)
+//	{
+//		// 마나 부족
+//		return false;
+//	}
+//	else
+//	{
+//		// 스킬 사용
+//		CurrentMpPoint -= point;
+//		return true;
+//	}
+//}
+//
+//void AMyCharacter::MPRestore(float point)
+//{
+//	CurrentMpPoint += point;
+//
+//	if (CurrentMpPoint > MaxMpPoint)
+//	{
+//		CurrentMpPoint = MaxMpPoint;
+//	}
+//}
 

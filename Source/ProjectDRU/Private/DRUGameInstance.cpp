@@ -16,7 +16,7 @@ void UDRUGameInstance::Init()
 {
 	Super::Init();
 
-	//ABLOG(Warning, TEXT("DropExp of Level 20 ADRUCHARACTER : %d"), GetDRUCharacterData(20)->DropExp);
+	ABLOG(Warning, TEXT("DropExp of Level 20 ADRUCHARACTER : %d, Hp : %f"), GetDRUCharacterData(20)->DropExp, GetDRUCharacterData(1)->MaxHP);
 }
 
 FDRUCharacterData * UDRUGameInstance::GetDRUCharacterData(int32 Level)

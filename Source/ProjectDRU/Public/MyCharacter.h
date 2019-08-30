@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "MyCharacter.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
+
 UCLASS()
 class PROJECTDRU_API AMyCharacter : public ACharacter
 {
@@ -39,15 +41,16 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Stat)
 	class UCharacterStatComponent* CharacterStat;
 
-	UPROPERTY(VisibleAnywhere, Category = UI)
+	UPROPERTY(EditAnywhere, Category = UI)
 	class UWidgetComponent* HPBarWidget;
 
+	void Attack();
+	FOnAttackEndDelegate OnAttackEnd;
 
 private:
 	void ViewChange();
 
 protected:
-	void Attack();
 	void AttackCheck();
 
 	UFUNCTION()
@@ -66,7 +69,8 @@ protected:
 	enum class EControlMode
 	{
 		GTA,
-		DIABLO
+		QUATERVIEW,
+		NPC
 	};
 
 	void SetControlMode(EControlMode NewControlMode);
@@ -82,16 +86,16 @@ protected:
 	/// [노대영] HP / MP 관련 함수 - Begin
 
 	// 체력 관련 함수
-	void Damaged(float point); // 데미지 계산 값이 0 이하시 true 반환
+	//void Damaged(float point); // 데미지 계산 값이 0 이하시 true 반환
 
-	void HPRestore(float point); // 체력 회복
+	//void HPRestore(float point); // 체력 회복
 
-	////void HpUse(float point); // 체력 소비 스킬 사용 추후에
+	//////void HpUse(float point); // 체력 소비 스킬 사용 추후에
 
-	// 마나 관련 함수
-	bool MpUse(float point); // 마나 사용 함수 <return> true = 스킬 사용 가능 false = 마나 부족
+	//// 마나 관련 함수
+	//bool MpUse(float point); // 마나 사용 함수 <return> true = 스킬 사용 가능 false = 마나 부족
 
-	void MPRestore(float ponint); // 마나 회복 함수 최대 마나치 까지 회복 가능 
+	//void MPRestore(float ponint); // 마나 회복 함수 최대 마나치 까지 회복 가능 
 
 	/// [노대영] HP / MP 관련 함수 - End
 
@@ -132,7 +136,7 @@ protected:
 
 	/// [노대영] HP / MP 관련 속성 - Begin
 
-	bool IsDie = false; // 죽었는지 체크
+	//bool IsDie = false; // 죽었는지 체크
 
 	// 체력 관련
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hp")
@@ -141,26 +145,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hp")
 		float MaxHpPoint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hp")
-		float HpPercent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hp")
+	//	float HpPercent;
 
-	// 체력 초당 회복
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hp")
-		float HpRestorePerSecond;*/
+	//// 체력 초당 회복
+	///*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hp")
+	//	float HpRestorePerSecond;*/
 
-	// 마나 관련
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
-		float CurrentMpPoint;
+	//// 마나 관련
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
+	//	float CurrentMpPoint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
-		float MaxMpPoint;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
+	//	float MaxMpPoint;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
-		float MpPercent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
+	//	float MpPercent;
 
-	// 마나 초당 회복
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
-		float MpRestorePerSecond;
+	//// 마나 초당 회복
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mp")
+	//	float MpRestorePerSecond;
 
 	/// [노대영] HP / MP 관련 속성 - End
 
