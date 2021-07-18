@@ -31,9 +31,11 @@ AProjectDRUCharacter::AProjectDRUCharacter()
 	// Create a camera boom...
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->bAbsoluteRotation = true; // Don't want arm to rotate when character does
+	// Private 변수를 접근하려고 해서 임시 주석 처리함. 4.22 -> 4.26로 Update해서 발생한 Side Effect일지? - 김현우, 2021.07.19.
+	// CameraBoom->bAbsoluteRotation = true; // Don't want arm to rotate when character does
 	CameraBoom->TargetArmLength = 800.f;
-	CameraBoom->RelativeRotation = FRotator(-60.f, 0.f, 0.f);
+	// Private 변수를 접근하려고 해서 임시 주석 처리함. 4.22 -> 4.26로 Update해서 발생한 Side Effect일지? - 김현우, 2021.07.19.
+	// CameraBoom->RelativeRotation = FRotator(-60.f, 0.f, 0.f);
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
 	// Create a camera...
