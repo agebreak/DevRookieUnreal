@@ -112,8 +112,7 @@ void AMyCharacter::Tick(float DeltaTime)
 	switch (CurrentControlMode)
 	{
 	case EControlMode::QUATERVIEW:
-		// Private 변수를 접근하려고 해서 임시 주석 처리함. 4.22 -> 4.26로 Update해서 발생한 Side Effect일지? - 김현우, 2021.07.19.
-		// SpringArm->RelativeRotation = FMath::RInterpTo(SpringArm->RelativeRotation, ArmRotationTo, DeltaTime, ArmRotationSpeed);
+		 SpringArm->SetRelativeRotation(FMath::RInterpTo(SpringArm->GetRelativeRotation(), ArmRotationTo, DeltaTime, ArmRotationSpeed));
 
 		if (DirectionToMove.SizeSquared() > 0.0f)
 		{
@@ -222,8 +221,7 @@ void AMyCharacter::ViewChange()
 		SetControlMode(EControlMode::QUATERVIEW);
 		break;
 	case EControlMode::QUATERVIEW:
-		// Private 변수를 접근하려고 해서 임시 주석 처리함. 4.22 -> 4.26로 Update해서 발생한 Side Effect일지? - 김현우, 2021.07.19.
-		// GetController()->SetControlRotation(SpringArm->RelativeRotation);
+		GetController()->SetControlRotation(SpringArm->GetRelativeRotation());
 		SetControlMode(EControlMode::GTA);
 		break;
 	}

@@ -10,7 +10,7 @@ public class ProjectDRU : ModuleRules
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "NavigationSystem", "AIModule", "UMG", "GameplayTasks" });
 
-		// D8049 Error 나서 추가 - 김현우, 2021.07.19.
+		// D8049 Error Fix Code. - Kim Hyeonwoo, 2021.07.19.
 		// 참고 : https://stackoverflow.com/questions/35262140/whats-the-cause-of-a-d8049-error-in-visual-studio
 		bLegacyPublicIncludePaths = false;
     }

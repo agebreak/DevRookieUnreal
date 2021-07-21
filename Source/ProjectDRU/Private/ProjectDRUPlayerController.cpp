@@ -6,7 +6,7 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "ProjectDRUCharacter.h"
 #include "Engine/World.h"
-#include "ProjectDRU/Core/EventManager.h"		// Core 경로를 찾기 못해 앞에 ProjectDRU 추가 - 김현우, 2021.07.19.
+#include "ProjectDRU/Core/EventManager.h"
 
 AProjectDRUPlayerController::AProjectDRUPlayerController()
 {

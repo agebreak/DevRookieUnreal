@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ProjectDRU/Core/IEventHandler.h"	// Core 경로를 찾기 못해 앞에 ProjectDRU 추가 - 김현우, 2021.07.19.
+#include "ProjectDRU/Core/IEventHandler.h"
 #include "ProjectDRUCharacter.generated.h"
 
 UCLASS(Blueprintable)
